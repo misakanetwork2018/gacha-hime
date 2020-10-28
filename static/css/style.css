@@ -1,0 +1,177 @@
+a {
+    text-decoration: none;
+}
+
+.container {
+    width: 100%;
+    max-width: 1300px;
+    margin: 0 auto;
+    display: flex;
+}
+
+.left {
+    flex: 1;
+}
+
+.right {
+    width: 500px;
+    height: 889px;
+    background: url("../img/misaka_mikoto.jpg");
+}
+
+.text-center {
+    text-align: center;
+}
+
+.auth {
+    border: 1px solid #aaaaaa;
+    padding: 5px 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 25px;
+    vertical-align: middle;
+}
+
+.username {
+    margin-left: 10px;
+    line-height: 50px;
+}
+
+.logout {
+    line-height: 50px;
+}
+
+.gacha-pool {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: start;
+}
+
+.gacha-pool > .item {
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid #393bd7;
+}
+
+.button {
+    outline: none;
+    color: white;
+    cursor: pointer;
+    padding: 5px 10px;
+    border: 1px solid #135c51;
+    background-color: #1c8d7d;
+}
+
+.button.disabled {
+    cursor: not-allowed;
+}
+
+.button + .button {
+    margin-left: 5px;
+}
+
+.gacha {
+    padding: 10px 20px;
+}
+
+.gacha.disabled {
+    background-color: #136154;
+}
+
+.active {
+    background-color: #ff9272;
+}
+
+.list {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+.list tr {
+    border-bottom: 1px solid #aaaaaa;
+}
+
+.list td, .list th {
+    padding: 5px 10px;
+}
+
+.dialog-shape {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 9;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.dialog {
+    border: 1px solid #aaaaaa;
+    border-radius: 10px;
+    position: fixed;
+    top: 200px;
+    left: 0;
+    right: 0;
+    width: 400px;
+    z-index: 999;
+    background: white;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.dialog-header, .dialog-footer {
+    padding: 10px 20px;
+}
+
+.dialog-body {
+    padding: 20px;
+}
+
+.dialog-header, .dialog-body {
+    border-bottom: 1px solid #aaaaaa;
+}
+
+.dialog-close {
+    float: right;
+    cursor: pointer;
+    color: #aaaaaa;
+}
+
+.clearfix {
+    clear: both;
+}
+
+.dialog-footer {
+    text-align: right;
+}
+
+.button-primary {
+    border-color: #2b62fd;
+    background-color: #5f8bf8;
+}
+
+.button-danger {
+    border-color: #d41c2c;
+    background-color: #dc3545;
+}
+
+select {
+    padding: 5px 10px;
+}
+
+#exchange-form {
+    margin: 0;
+}
+
+.footer {
+    width: 100%;
+    margin: 20px 0;
+    text-align: center;
+}
