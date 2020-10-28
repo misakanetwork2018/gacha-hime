@@ -145,7 +145,7 @@ function exchange(id) {
                                 + '></select>');
                             if (field.options.length === undefined) {
                                 for (var key in field.options) {
-                                    select.append('<option name="' + key + '">' + field.options[key] + '</option>')
+                                    select.append('<option value="' + key + '">' + field.options[key] + '</option>')
                                 }
                             } else {
                                 field.options.forEach(function (value) {

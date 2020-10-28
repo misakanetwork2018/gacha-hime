@@ -25,10 +25,10 @@ class Index extends \Module
         $result = $this->db->query("select * from result where uid = ? order by created desc", $user_id,
             false, function ($item) {
             $item['extra'] = json_decode($item['extra'], true);
+            $item['description'] = $this->generateDescription($item);
             $item['status'] = RESULT_STATUSES[$item['status']];
             $item['created'] = date("Y-m-d H:i:s", $item['created']);
             $item['passed'] = $item['passed'] ? date("Y-m-d H:i:s", $item['passed']) : '-';
-            $item['description'] = $this->generateDescription($item);
             return $item;
         });
 
@@ -80,6 +80,8 @@ class Index extends \Module
             return ['success' => false, 'msg' => '出了一点问题，稍后再试吧'];
         }
 
+        $info['status'] = 0;
+
         return ['success' => true, 'msg' => $msg, 'result' => [
             'id' => $info['id'],
             'name' => $name,
@@ -95,10 +97,16 @@ class Index extends \Module
 
     private function generateDescription($info)
     {
+        if ($info['status'] == 2)
+            return '拒绝原因：' . $info['extra']['reason'];
+
         switch ($info['type']) {
             case 'trf_pkg':
                 $expire = date("Y-m-d H:i:s", $info['expire']);
-                return <<<HTML
+                if ($info['extra']['exchange'] && $info['status'] == 0)
+                    return '已兑换，请等待发放';
+                elseif (!$info['extra']['exchange'])
+                    return <<<HTML
 请在{$expire}之前兑换
 <button class="button button-primary" onclick="exchange('{$info['id']}')">兑换</button>
 HTML;
@@ -159,7 +167,7 @@ HTML;
                 }
 
                 $field = [
-                    ['type' => 'select', 'name' => 'aaa', 'label' => '绑定底包', 'required' => true, 'options' => $options]
+                    ['type' => 'select', 'name' => 'base', 'label' => '绑定底包', 'required' => true, 'options' => $options]
                 ];
                 break;
             default:
@@ -171,22 +179,42 @@ HTML;
 
     public function exchange()
     {
+        $back_html = '，<a href="/">点击这里</a>返回首页';
+
         $id = $this->request->post('id');
+
+        $data = $this->request->post();
+
+        unset($data['id']);
+
+        if (empty($id))
+            return '奖品不存在' . $back_html;
 
         $result = $this->db->query("select * from result where id = ?", $id, true);
 
         if (is_null($result))
-            return '奖品不存在';
+            return '奖品不存在' . $back_html;
 
         $result['extra'] = json_decode($result['extra'], true);
 
         if (!isset($result['extra']['exchange']) || !in_array($result['type'], ['trf_pkg']))
-            return '奖品无需兑换';
+            return '奖品无需兑换' . $back_html;
 
         if ($result['extra']['exchange'])
-            return '奖品已被兑换';
+            return '奖品已被兑换' . $back_html;
 
+        $sql = '';
+        $binds = [];
 
+        foreach ($data as $key => $val) {
+            $sql .= ', ?, ?';
+            $binds[] = '$.' . $key;
+            $binds[] = $val;
+        }
+
+        $binds[] = $id;
+
+        $this->db->exec("update result set extra = json_set(extra, '$.exchange', true{$sql}) where id = ?", $binds);
 
         return Redirect::to('/');
     }

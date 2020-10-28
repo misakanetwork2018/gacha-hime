@@ -40,30 +40,32 @@
         <?php endif ?>
         <hr>
         <p class="text-center">我的奖品</p>
-        <table class="list">
-            <thead>
-            <tr>
-                <th>#</th>
-                <th style="width: 80px;">奖项名称</th>
-                <th style="width: 100px;">状态</th>
-                <th>备注</th>
-                <th>中奖时间</th>
-                <th>发放时间</th>
-            </tr>
-            </thead>
-            <tbody id="result-table">
-            <?php foreach ($this->result as $item): ?>
-            <tr>
-                <td><?php echo $item['id'] ?></td>
-                <td><?php echo $item['name'] ?></td>
-                <td><?php echo $item['status'] ?></td>
-                <td><?php echo $item['description'] ?></td>
-                <td><?php echo $item['created'] ?></td>
-                <td><?php echo $item['passed'] ?></td>
-            </tr>
-            <?php endforeach; ?>
-            </tbody>
-        </table>
+        <div class="responsive">
+            <table class="list">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th style="width: 80px;">奖项名称</th>
+                    <th style="width: 100px;">状态</th>
+                    <th>备注</th>
+                    <th style="min-width: 100px;">中奖时间</th>
+                    <th style="min-width: 100px;">发放时间</th>
+                </tr>
+                </thead>
+                <tbody id="result-table">
+                <?php foreach ($this->result as $item): ?>
+                    <tr>
+                        <td><?php echo $item['id'] ?></td>
+                        <td><?php echo $item['name'] ?></td>
+                        <td><?php echo $item['status'] ?></td>
+                        <td><?php echo $item['description'] ?></td>
+                        <td><?php echo $item['created'] ?></td>
+                        <td><?php echo $item['passed'] ?></td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
     <div class="right"></div>
 </div>

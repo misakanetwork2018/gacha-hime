@@ -2,4 +2,18 @@
     .right {
         display: none;
     }
+
+    .responsive {
+        width: calc(100vw - 14px);
+        overflow: auto;
+    }
+
+    .responsive .list {
+        width: auto;
+    }
+
+    .dialog {
+        width: calc(100vw - 10px);
+        max-width: 400px;
+    }
 }
