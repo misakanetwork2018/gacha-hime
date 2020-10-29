@@ -119,7 +119,7 @@ class Index extends \Module
 HTML;
                 break;
             case 'promotion':
-                return $info['extra']['promotion'] ?? '';
+                return $info['extra']['code'] ?? '';
         }
 
         return '';
