@@ -11,6 +11,12 @@ return [
     ],
     'api' => '',
     'key' => '',
+    'cron' => [
+        'key' => '',
+        'enable' => true,
+        'reset' => true,
+        'gacha_times' => 1
+    ],
     'debug' => false,
     'event' => [
         'time' => [],
