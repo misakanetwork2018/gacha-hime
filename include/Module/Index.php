@@ -73,6 +73,12 @@ class Index extends \Module
 
         $user_id = $_SESSION['user']['id'];
 
+        $baning = $this->db->query("select count(*) as count from black_list where uid = ? and ".
+                "(expire is null or expire > ?)", [$user_id, time()], true)['count'] > 0;
+
+        if ($baning)
+            return ['success' => false, 'msg' => '您已被管理员封禁，无法抽奖'];
+
         $profile = $this->db->query("select * from profile where uid = ?", $user_id, true);
 
         if ($profile['gacha_times'] <= 0) {
