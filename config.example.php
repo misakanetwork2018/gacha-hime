@@ -17,6 +17,16 @@ return [
         'reset' => true,
         'gacha_times' => 1
     ],
+    'telegram' => [
+        'notify' => true,
+        'chat_id' => '',
+        'bot_key' => ''
+    ],
+    'mail' => [ // only support mailgun
+        'api_key' => '',
+        'domain' => '',
+        'from' => '',
+    ],
     'debug' => false,
     'event' => [
         'time' => [],
