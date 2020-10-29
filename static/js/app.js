@@ -18,19 +18,24 @@ function gacha() {
         cache: false,
         dataType: 'json',
         success: function (data) {
-            runningAnimate(0, data.gacha.total, data.gacha.times, function () {
+            if (data.success) {
+                runningAnimate(0, data.gacha.total, data.gacha.times, function () {
+                    $(".gacha").removeClass('disabled').text("点击抽奖").attr("disabled", false)
+                    dialog('恭喜中奖', '您中的是：' + data.result.name + "<br>" + data.msg)
+                    $('#result-table').prepend('<tr>' +
+                        '<td>' + data.result.id + '</td>' +
+                        '<td>' + data.result.name + '</td>' +
+                        '<td>' + data.result.status + '</td>' +
+                        '<td>' + data.result.description + '</td>' +
+                        '<td>' + data.result.created + '</td>' +
+                        '<td>-</td>' +
+                        '</tr>');
+                    $('#gacha-times').text(data.gacha.rest)
+                })
+            } else {
+                dialog('无法抽奖', data.msg)
                 $(".gacha").removeClass('disabled').text("点击抽奖").attr("disabled", false)
-                dialog('恭喜中奖', '您中的是：' + data.result.name + "<br>" + data.msg)
-                $('#result-table').prepend('<tr>' +
-                    '<td>' + data.result.id + '</td>' +
-                    '<td>' + data.result.name + '</td>' +
-                    '<td>' + data.result.status + '</td>' +
-                    '<td>' + data.result.description + '</td>' +
-                    '<td>' + data.result.created + '</td>' +
-                    '<td>-</td>' +
-                    '</tr>');
-                $('#gacha-times').text(data.gacha.rest)
-            })
+            }
         },
         error: function () {
 

@@ -37,6 +37,14 @@ class Index extends \Module
 
     public function gacha()
     {
+        if (App::config('event.enable')) {
+            [$start, $end] = App::config('event.time');
+            if ($start > time() || $end < time())
+                return ['success' => false, 'msg' => '未到抽奖时间'];
+        } else {
+            return ['success' => false, 'msg' => '当前无法抽奖'];
+        }
+
         $user_id = $_SESSION['user']['id'];
 
         $profile = $this->db->query("select * from profile where uid = ?", $user_id, true);
