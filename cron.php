@@ -2,13 +2,15 @@
 
 define('APP_ROOT', __DIR__);
 
+define('CLI_MODE', preg_match("/cli/i", php_sapi_name()));
+
 require_once APP_ROOT . "/include/App.php";
 
 App::init();
 
 if (!App::config('cron.enable')) return;
 
-if (preg_match("/cli/i", php_sapi_name())) {
+if (CLI_MODE) {
     $args = getopt("k:");
     $key = $args['k'] ?? null;
 } else {
@@ -50,6 +52,7 @@ foreach ($mail_list as $mail) {
     curl_close($ch);
 }
 
-$db->exec("update mail_list set sent = ? where id in (" . implode(",", $mail_ids) . ")", time());
+if ($mail_ids)
+    $db->exec("update mail_list set sent = ? where id in (" . implode(",", $mail_ids) . ")", time());
 
 echo 'ok';
