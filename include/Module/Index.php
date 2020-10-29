@@ -24,13 +24,13 @@ class Index extends \Module
 
         $result = $this->db->query("select * from result where uid = ? order by created desc", $user_id,
             false, function ($item) {
-            $item['extra'] = json_decode($item['extra'], true);
-            $item['description'] = $this->generateDescription($item);
-            $item['status'] = RESULT_STATUSES[$item['status']];
-            $item['created'] = date("Y-m-d H:i:s", $item['created']);
-            $item['passed'] = $item['passed'] ? date("Y-m-d H:i:s", $item['passed']) : '-';
-            return $item;
-        });
+                $item['extra'] = json_decode($item['extra'], true);
+                $item['description'] = $this->generateDescription($item);
+                $item['status'] = RESULT_STATUSES[$item['status']];
+                $item['created'] = date("Y-m-d H:i:s", $item['created']);
+                $item['passed'] = $item['passed'] ? date("Y-m-d H:i:s", $item['passed']) : '-';
+                return $item;
+            });
 
         return View::make('index', ['times' => $profile['gacha_times'], 'result' => $result]);
     }
@@ -55,10 +55,13 @@ class Index extends \Module
 
         $info['expire'] = null;
         $msg = '奖品将在24小时内发放';
+        $notify = true;
+
         if ($type === 'trf_pkg') {
             $info['expire'] = strtotime("+7days"); // 七天内领取
             $data['exchange'] = false;
             $msg .= '，流量包产品需要手动兑换，请在' . date("Y-m-d H:i:s", $info['expire']) . "之前兑换，逾期无效";
+            $notify = false;
         }
 
         $info['extra'] = $data;
@@ -73,6 +76,10 @@ class Index extends \Module
 
             $this->db->exec("update profile set gacha_times = if(gacha_times < 1, 0, gacha_times - 1) where uid = ?",
                 $user_id);
+
+            if ($notify) {
+                $this->notify();
+            }
 
             $this->db->commit();
         } catch (\Exception $e) {
@@ -110,11 +117,12 @@ class Index extends \Module
 请在{$expire}之前兑换
 <button class="button button-primary" onclick="exchange('{$info['id']}')">兑换</button>
 HTML;
+                break;
             case 'promotion':
                 return $info['extra']['promotion'] ?? '';
-            default:
-                return '';
         }
+
+        return '';
     }
 
     private function gachaRun($pool)
@@ -216,6 +224,26 @@ HTML;
 
         $this->db->exec("update result set extra = json_set(extra, '$.exchange', true{$sql}) where id = ?", $binds);
 
+        $this->notify();
+
         return Redirect::to('/');
+    }
+
+    private function notify()
+    {
+        $info = App::make(\Api::class)->getUserInfoExtra($_SESSION['token']);
+        if ($info)
+            $this->db->exec("insert into mail_list (subject, content, `to`, created) " .
+                "values (?, ?, ?, ?)", ['[御坂网络]有一个新的中奖信息待审核',
+                <<<EOT
+亲爱的管理员：
+有一个新的中奖信息待审核
+EOT
+                , $info['email'], time()
+            ]);
+        if (App::config('telegram.notify'))
+            curl_post("https://api.telegram.org/bot" . App::config('telegram.bot_token') .
+                "/sendMessage", ["chat_id" => App::config('telegram.chat_id'),
+                "text" => "中奖列表已更新，请前去审核"]);
     }
 }
