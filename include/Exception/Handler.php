@@ -38,8 +38,8 @@ class Handler
     {
         unset($this->_memoryReserve);//释放内存供下面处理程序使用
         $error = error_get_last();//最后一条错误信息
-        if (errorHandlerException::isFatalError($error)) {//如果是致命错误进行处理
-            $exception = new errorHandlerException($error['message'], $error['type'], $error['type'], $error['file'], $error['line']);
+        if (ErrorHandlerException::isFatalError($error)) {//如果是致命错误进行处理
+            $exception = new ErrorHandlerException($error['message'], $error['type'], $error['type'], $error['file'], $error['line']);
             $this->report($exception);
             exit(1);
         }
