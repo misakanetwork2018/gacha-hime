@@ -2,6 +2,7 @@
 
 namespace Module;
 
+use Helper\Arr;
 use Middleware\Api;
 
 class Sync extends \Module
@@ -19,8 +20,7 @@ class Sync extends \Module
         $size = $this->request->get('size', 10);
         $column = $this->request->get('column');
         $order = $this->request->get('order');
-        $query = $this->request->get();
-        unset($query['page'], $query['size'], $query['column'], $query['order']);
+        $query = json_decode($this->request->get('search'), true);
 
         $whiteList = ['id', 'uid', 'type', 'name', 'status', 'created', 'passed', 'expire'];
 
@@ -47,7 +47,11 @@ class Sync extends \Module
     {
         $id = $this->request->get('id');
 
-        return $this->db->query('select * from result where id = ?', $id, true);
+        $result = $this->db->query('select * from result where id = ?', $id, true);
+
+        $result['extra'] = json_decode($result['extra'], true);
+
+        return $result;
     }
 
     public function update()
@@ -55,9 +59,22 @@ class Sync extends \Module
         $id = $this->request->post('id');
         $status = $this->request->post('status');
         $reason = $this->request->post('reason');
+        $extra = $this->request->post('extra');
 
         if ($status == 1) {
-            $success = $this->db->exec('update result set status = 1 where id = ?', $id);
+            $sql = '';
+            $binds = [time()];
+
+            foreach ($extra as $key => $val) {
+                if (!in_array($key, ['code'])) continue;
+
+                $sql .= ", extra = json_set(extra, '$.{$key}', ?)";
+                $binds[] = $val;
+            }
+
+            $binds[] = $id;
+
+            $success = $this->db->exec("update result set status = 1, passed = ?{$sql} where id = ?", $binds);
         } elseif ($status == 2) {
             $success = $this->db->exec("update result set status = 2, ".
                 "extra = json_set(extra, '$.reason', ?) where id = ?", [$reason, $id]);
@@ -102,21 +119,96 @@ class Sync extends \Module
 
     private function buildWhereSQL(array $wheres, $whiteList = [])
     {
-        $sql = '';
+        $where_sql = '';
         $binds = [];
 
-        foreach ($wheres as $key => $val) {
+        foreach ($wheres as $key => $item) {
             if (!empty($whiteList) && !in_array($key, $whiteList)) continue;
 
-            if (empty($sql))
+            if (empty($where_sql))
                 $sql = ' where ';
             else
-                $sql .= ' and ';
+                $sql = ' and ';
 
-            $sql .= "$key = ?";
-            $binds[] = $val;
+            $value = $item['value'] ?? null;
+            $pass = false;
+
+            switch ($item['type']) {
+                case 'equal':
+                    if (is_null($value) || $value === '') {
+                        $pass = true;
+                        break;
+                    }
+                    $sql .= $key . ' = ?';
+                    $binds[] = $value;
+                    break;
+                case 'like':
+                    if (is_null($value) || $value === '') {
+                        $pass = true;
+                        break;
+                    }
+                    $sql .= $key . ' like ?';
+                    $binds[] = "%$value%";
+                    break;
+                case 'range':
+                    if (isset($item['start'])) {
+                        $op = isset($item['start_exclude']) && $item['start_exclude'] ? '>' : '>=';
+                        $sql .= $key . ' ' . $op . ' ?';
+                        $binds[] = $item['start'];
+                    }
+                    if (isset($item['end'])) {
+                        $op = isset($item['start_exclude']) && $item['start_exclude'] ? '<' : '<=';
+                        $sql .= $key . ' ' . $op . ' ?';
+                        $binds[] = $item['end'];
+                    }
+                    if (!isset($item['start']) && !isset($item['end'])) $pass = true;
+                    break;
+                case 'array':
+                    $value = Arr::wrap($value);
+                    if (!count($value)) {
+                        $pass = true;
+                        break;
+                    }
+                    $sql .= $key . " in (" . implode(",", array_fill(0, count($value), '?')) . ')';
+                    $binds = array_merge($binds, $value);
+                    break;
+            }
+
+            if (!$pass) {
+                $where_sql .= $sql;
+            }
         }
 
-        return [$sql, $binds];
+        return [$where_sql, $binds];
+    }
+
+    public function ban()
+    {
+        $uid = $this->request->post('uid');
+        $expire = $this->request->post('expire');
+        $reason = $this->request->post('reason');
+
+        $baning = $this->db->query("select count(*) as count from black_list where uid = ? and ".
+                "(expire is null or expire > ?)", [$uid, time()], true)['count'] > 0;
+
+        if ($baning)
+            return ['success' => false, 'msg' => '已经在封禁状态'];
+
+        $bool = $this->db->exec("insert into black_list (uid, created, reason, expire) values (?, ?, ?, ?)",
+            [$uid, time(), $reason, $expire]);
+
+        return ['success' => $bool];
+    }
+
+    public function banList()
+    {
+        $valid = $this->request->get('valid');
+
+        $sql = '';
+
+        if ($valid)
+            $sql = ' where expire is null or expire > ?';
+
+        return $this->db->query("select * from black_list" . $sql . ' order by id desc', time());
     }
 }
