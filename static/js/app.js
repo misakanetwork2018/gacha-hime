@@ -1,11 +1,89 @@
 $(function () {
-    $(document).on('click', '.dialog-close', close_dialog)
+    var page = 1;
+    var total = 0;
+
+    getResultList(false, true)
+
+    $(document).on('click', '.dialog-close', close_dialog);
+
+    $("#page").on('keypress', function (e) {
+        if (e.keyCode === 13) {
+            page = $(e.target).val()
+            getResultList(true)
+        }
+    });
+
+    $('#pagination-back').on('click', function () {
+        if (page <= 1) return
+        page--
+        getResultList(true)
+    })
+
+    $('#pagination-next').on('click', function () {
+        if (page > Math.ceil(total / 10)) return
+        page++
+        getResultList(true)
+    })
+
+    function getResultList(loading, onlyCount) {
+        var timeout;
+
+        if (loading)
+            timeout = setTimeout(function () {listLoading(true)}, 200)
+
+        $.ajax({
+            url: '/index/result',
+            method: 'get',
+            cache: false,
+            data: {
+                page: page,
+                onlyCount: onlyCount
+            },
+            dataType: 'json',
+            success: function (data) {
+                page = data.curr;
+                total = data.total;
+                $('#page').val(page)
+
+                clearTimeout(timeout)
+                listLoading(false)
+
+                if (data.data) {
+                    $("#result-table").html("");
+                    data.data.forEach(function (item) {
+                        $('#result-table').append('<tr>' +
+                            '<td>' + item.id + '</td>' +
+                            '<td>' + item.name + '</td>' +
+                            '<td>' + item.status + '</td>' +
+                            '<td>' + item.description + '</td>' +
+                            '<td>' + item.created + '</td>' +
+                            '<td>' + (item.passed || '-') + '</td>' +
+                            '</tr>');
+                    })
+                }
+            },
+            error: function () {
+                dialog('无法获取列表', '系统发生异常')
+            }
+        })
+    }
+
+    function listLoading(enable) {
+        if (enable) {
+            $('.result-list').append($('<div class="list-mask"></div>'))
+                .append($('<div class="list-loading-text">Loading...</div>'))
+        } else {
+            $('.list-mask').remove()
+            $('.list-loading-text').remove()
+        }
+    }
 });
 
 $.ajaxSetup({
-    complete: function (XMLHttpRequest,status) {
-        if(status === 'error' || status === 'parsererror'){
-            window.location.reload()
+    complete: function (XMLHttpRequest, status) {
+        if (status === 'error' || status === 'parsererror') {
+            if (XMLHttpRequest.status === 401)
+                window.location.reload()
         }
     },
 })
@@ -81,17 +159,6 @@ function runningAnimate(offset, total, times, done) {
     }
 
     setTimeout(activeNextItem, 200)
-}
-
-function randomNum(minNum, maxNum) {
-    switch (arguments.length) {
-        case 1:
-            return parseInt(Math.random() * minNum + 1, 10);
-        case 2:
-            return parseInt(Math.random() * (maxNum - minNum + 1) + minNum, 10);
-        default:
-            return 0;
-    }
 }
 
 function dialog(title, content, buttons) {
@@ -177,7 +244,8 @@ function exchange(id) {
             }
         },
         error: function () {
-
+            dialog('无法兑换奖品', '系统发生异常')
         }
     })
 }
+

@@ -5,6 +5,7 @@ namespace Middleware;
 use App;
 use Http\Redirect;
 use Http\Request;
+use Http\Response;
 
 class Auth implements Middleware
 {
@@ -12,8 +13,14 @@ class Auth implements Middleware
     {
         $token = $_SESSION['token'] ?? null;
 
-        if (!$token || ($user = App::make(\Api::class)->getUserInfo($token)) === false)
-            return Redirect::to('/auth/index');
+        if (!$token || ($user = App::make(\Api::class)->getUserInfo($token)) === false) {
+            if (isset($_SERVER["HTTP_X_REQUESTED_WITH"]) &&
+                strtolower($_SERVER["HTTP_X_REQUESTED_WITH"]) == 'xmlhttprequest') {
+                return Response::make('Login Expire', 401);
+            } else {
+                return Redirect::to('/auth/index');
+            }
+        }
 
         $_SESSION['user'] = $user;
 

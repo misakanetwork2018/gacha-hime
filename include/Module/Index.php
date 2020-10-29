@@ -3,7 +3,6 @@
 namespace Module;
 
 use App;
-use DB;
 use Http\Redirect;
 use View;
 
@@ -22,17 +21,44 @@ class Index extends \Module
 
         $profile = $this->db->query("select * from profile where uid = ?", $user_id, true);
 
-        $result = $this->db->query("select * from result where uid = ? order by created desc", $user_id,
-            false, function ($item) {
-                $item['extra'] = json_decode($item['extra'], true);
-                $item['description'] = $this->generateDescription($item);
-                $item['status'] = RESULT_STATUSES[$item['status']];
-                $item['created'] = date("Y-m-d H:i:s", $item['created']);
-                $item['passed'] = $item['passed'] ? date("Y-m-d H:i:s", $item['passed']) : '-';
-                return $item;
-            });
+        return View::make('index', ['times' => $profile['gacha_times'], 'result' => $this->result()]);
+    }
 
-        return View::make('index', ['times' => $profile['gacha_times'], 'result' => $result]);
+    public function result()
+    {
+        $user_id = $_SESSION['user']['id'];
+
+        $page = $this->request->get('page');
+
+        $onlyCount = $this->request->get('onlyCount');
+
+        if ($page <= 0) $page = 1;
+
+        $size = 10;
+
+        $offset = ($page - 1) * $size;
+
+        $count = $this->db->query("select count(*) as count from result where uid = ?",
+            $user_id, true)['count'];
+
+        if (!$onlyCount) {
+            $result = $this->db->query("select * from result where uid = ? order by created desc limit ".
+                "{$offset}, {$size}", $user_id,
+                false, function ($item) {
+                    $item['extra'] = json_decode($item['extra'], true);
+                    $item['description'] = $this->generateDescription($item);
+                    $item['status'] = RESULT_STATUSES[$item['status']];
+                    $item['created'] = date("Y-m-d H:i:s", $item['created']);
+                    $item['passed'] = $item['passed'] ? date("Y-m-d H:i:s", $item['passed']) : '-';
+                    return $item;
+                });
+        }
+
+        return [
+            'total' => $count,
+            'data' => $result ?? null,
+            'curr' => $page
+        ];
     }
 
     public function gacha()

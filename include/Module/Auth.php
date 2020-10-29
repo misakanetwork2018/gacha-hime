@@ -19,7 +19,7 @@ class Auth extends \Module
 
         $user_id = $_SESSION['user']['id'];
 
-        $profile = $this->db->query("select * from profile where uid = ?", $user_id, true);var_dump($profile);
+        $profile = $this->db->query("select * from profile where uid = ?", $user_id, true);
 
         if (is_null($profile))
             $this->db->exec("insert into profile (uid, gacha_times) values (?, ?)", [$user_id, 1]);

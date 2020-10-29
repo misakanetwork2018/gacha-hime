@@ -40,31 +40,40 @@
         <?php endif ?>
         <hr>
         <p class="text-center">我的奖品</p>
-        <div class="responsive">
-            <table class="list">
-                <thead>
-                <tr>
-                    <th>#</th>
-                    <th style="width: 80px;">奖项名称</th>
-                    <th style="width: 100px;">状态</th>
-                    <th>备注</th>
-                    <th style="min-width: 100px;">中奖时间</th>
-                    <th style="min-width: 100px;">发放时间</th>
-                </tr>
-                </thead>
-                <tbody id="result-table">
-                <?php foreach ($this->result as $item): ?>
+        <div class="result-list">
+            <div class="responsive">
+                <table class="list">
+                    <thead>
                     <tr>
-                        <td><?php echo $item['id'] ?></td>
-                        <td><?php echo $item['name'] ?></td>
-                        <td><?php echo $item['status'] ?></td>
-                        <td><?php echo $item['description'] ?></td>
-                        <td><?php echo $item['created'] ?></td>
-                        <td><?php echo $item['passed'] ?></td>
+                        <th>#</th>
+                        <th style="width: 80px;">奖项名称</th>
+                        <th style="width: 100px;">状态</th>
+                        <th>备注</th>
+                        <th style="min-width: 100px;">中奖时间</th>
+                        <th style="min-width: 100px;">发放时间</th>
                     </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody id="result-table">
+                    <?php foreach ($this->result['data'] as $item): ?>
+                        <tr>
+                            <td><?php echo $item['id'] ?></td>
+                            <td><?php echo $item['name'] ?></td>
+                            <td><?php echo $item['status'] ?></td>
+                            <td><?php echo $item['description'] ?></td>
+                            <td><?php echo $item['created'] ?></td>
+                            <td><?php echo $item['passed'] ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <ul class="pagination">
+                <li class="item"><a href="javascript:;" id="pagination-back">&laquo;</a></li>
+                <li>
+                    <input type="number" class="page" id="page" value="<?php echo $this->result['curr'] ?>">
+                </li>
+                <li class="item"><a href="javascript:;" id="pagination-next">&raquo;</a></li>
+            </ul>
         </div>
     </div>
     <div class="right"></div>

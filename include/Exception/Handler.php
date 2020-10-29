@@ -73,6 +73,8 @@ class Handler
     public function render($exception)
     {
         try {
+            ob_end_clean();
+            http_response_code(500);
             $view = \View::make($this->view, ['e' => $exception, 'show' => \App::config('debug')]);
             if ($view->isExist())
                 $view->render();
