@@ -35,4 +35,13 @@ class Api
 
         return $data;
     }
+
+    public function getUserInfoExtra($token)
+    {
+        $data = curl_get($this->api . '/user/info', ['Authorization: Bearer ' . $token]);
+
+        if (!$this->checkOK($data)) return false;
+
+        return $data;
+    }
 }
