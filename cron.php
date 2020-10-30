@@ -36,8 +36,6 @@ $db->exec("update result set status = 2, extra = json_set(extra, '$.reason', 'å·
 
 $mail_list = $db->query("select * from mail_list where sent is null");
 
-$mail_ids = array_column($mail_list, 'id');
-
 foreach ($mail_list as $mail) {
     $data = http_build_query(array(
         'from' => App::config('mail.from'),
@@ -56,9 +54,8 @@ foreach ($mail_list as $mail) {
     curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
     curl_exec($ch);
     curl_close($ch);
-}
 
-if ($mail_ids)
-    $db->exec("update mail_list set sent = ? where id in (" . implode(",", $mail_ids) . ")", time());
+    $db->exec("update mail_list set sent = ? where id = ?", [time(), $mail['id']]);
+}
 
 echo 'ok';
