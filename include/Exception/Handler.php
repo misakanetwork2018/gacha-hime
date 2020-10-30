@@ -2,11 +2,14 @@
 
 namespace Exception;
 
+use Throwable;
+
 class Handler
 {
     private $view = 'error';
 
-    public  $memoryReserveSize = 262144;//备用内存大小
+    public $memoryReserveSize = 262144;//备用内存大小
+
     private $_memoryReserve;//备用内存
 
     public function register()
@@ -30,6 +33,8 @@ class Handler
         $this->unregister();
 
         $this->render($exception);
+
+        $this->report($exception);
 
         exit(1);
     }
@@ -95,10 +100,19 @@ class Handler
     /**
      * 报告错误
      *
-     * @param $exception
+     * @param Throwable $exception
      */
-    public function report($exception)
+    public function report(Throwable $exception)
     {
+        $log_dir = APP_ROOT . '/runtime/logs';
+        if (!is_dir($log_dir))
+            mkdir($log_dir, 0755, true);
 
+        $filename = $log_dir . '/' . date('Ymd') . '.log';
+        $handle = fopen($filename, "a+");
+        fwrite($handle, date('Y-m-d H:i:s') . " system error: {$exception->getMessage()} at ".
+            "{$exception->getFile()}:{$exception->getLine()}\n");
+        fwrite($handle, "{$exception->getTraceAsString()}\n");
+        fclose($handle);
     }
 }
