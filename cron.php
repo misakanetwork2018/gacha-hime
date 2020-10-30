@@ -22,7 +22,13 @@ if (App::config('cron.key') != $key) die('err');
 $db = App::make(DB::class);
 
 if (App::config('cron.reset')) {
-    $db->exec("update profile set gacha_times = ?", App::config('cron.gacha_times'));
+    if (file_exists($nextResetTimeFile = APP_ROOT . '/runtime/nextResetTime'))
+        $nextResetTime = file_get_contents($nextResetTimeFile);
+
+    if (!isset($nextResetTime) || time() > $nextResetTime) {
+        $db->exec("update profile set gacha_times = ?", App::config('cron.gacha_times'));
+        file_put_contents($nextResetTimeFile, strtotime('next day 0:00'));
+    }
 }
 
 $db->exec("update result set status = 2, extra = json_set(extra, '$.reason', '已超过兑换时间') where " .
