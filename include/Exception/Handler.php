@@ -73,13 +73,19 @@ class Handler
     public function render($exception)
     {
         try {
-            ob_end_clean();
-            http_response_code(500);
-            $view = \View::make($this->view, ['e' => $exception, 'show' => \App::config('debug')]);
-            if ($view->isExist())
-                $view->render();
-            else
-                echo "Error, and no default error page.";
+            if (CLI_MODE) {
+                echo "***System error***\n";
+                echo $exception->getMessage() . "\n\n";
+                debug_print_backtrace();
+            } else {
+                ob_end_clean();
+                http_response_code(500);
+                $view = \View::make($this->view, ['e' => $exception, 'show' => \App::config('debug')]);
+                if ($view->isExist())
+                    $view->render();
+                else
+                    echo "Error, and no default error page.";
+            }
         } catch (ClassNotExistException $e) {
             // 万一连这个都坏了，为了避免死循环，将会直接输出以下文本
             echo "App broken, you should check the completeness of the system.";
