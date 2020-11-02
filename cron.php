@@ -56,6 +56,11 @@ foreach ($mail_list as $mail) {
     curl_close($ch);
 
     $db->exec("update mail_list set sent = ? where id = ?", [time(), $mail['id']]);
+
+    if ($mail['to'] == App::config('admin_email'))
+        curl_post("https://api.telegram.org/bot" . App::config('telegram.bot_token') .
+            "/sendMessage", ["chat_id" => App::config('telegram.chat_id'),
+            "text" => "中奖列表已更新，请前去审核"]);
 }
 
 echo 'ok';

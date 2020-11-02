@@ -281,9 +281,5 @@ HTML;
 EOT
                 , App::config('admin_email'), time()
             ]);
-        if (App::config('telegram.notify'))
-            curl_post("https://api.telegram.org/bot" . App::config('telegram.bot_token') .
-                "/sendMessage", ["chat_id" => App::config('telegram.chat_id'),
-                "text" => "中奖列表已更新，请前去审核"]);
     }
 }
