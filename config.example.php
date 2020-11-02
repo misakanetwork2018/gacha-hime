@@ -27,6 +27,7 @@ return [
         'domain' => '',
         'from' => '',
     ],
+    'admin_email' => '',
     'debug' => false,
     'event' => [
         'time' => [],

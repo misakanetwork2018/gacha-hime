@@ -279,7 +279,7 @@ HTML;
 亲爱的管理员：
 有一个新的中奖信息待审核
 EOT
-                , $info['email'], time()
+                , App::config('admin_email'), time()
             ]);
         if (App::config('telegram.notify'))
             curl_post("https://api.telegram.org/bot" . App::config('telegram.bot_token') .
