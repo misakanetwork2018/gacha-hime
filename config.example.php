@@ -1,5 +1,7 @@
 <?php
 
+const RESULT_STATUSES = ['待发放', '已发放', '拒绝发放'];
+
 return [
     'db' => [
         'host' => '127.0.0.1',
