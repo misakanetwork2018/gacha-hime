@@ -22,7 +22,7 @@ return [
     'telegram' => [
         'notify' => true,
         'chat_id' => '',
-        'bot_key' => ''
+        'bot_token' => ''
     ],
     'mail' => [ // only support mailgun
         'api_key' => '',
