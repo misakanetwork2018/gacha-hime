@@ -24,10 +24,11 @@ return [
         'chat_id' => '',
         'bot_token' => ''
     ],
-    'mail' => [ // only support mailgun
+    'mail' => [ // only support sendcloud
+        'api_user' => '',
         'api_key' => '',
-        'domain' => '',
         'from' => '',
+        'fromName' => '',
     ],
     'admin_email' => '',
     'debug' => false,
