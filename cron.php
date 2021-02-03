@@ -37,7 +37,7 @@ $db->exec("update result set status = 2, extra = json_set(extra, '$.reason', '�
 $mail_list = $db->query("select * from mail_list where sent is null");
 
 foreach ($mail_list as $mail) {
-    $data = http_build_query([
+    $result = curl_post("https://api.sendcloud.net/apiv2/mail/send", [
         'apiUser' => App::config('api_user'), # 使用api_user和api_key进行验证
         'apiKey' => App::config('api_key'),
         'from' => App::config('mail.from'), # 发信人，用正确邮件地址替代
@@ -46,15 +46,7 @@ foreach ($mail_list as $mail) {
         'subject' => $mail['subject'],
         'plain' => $mail['content']
     ]);
-    $url = "https://api.sendcloud.net/apiv2/mail/send";
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-    curl_exec($ch);
-    curl_close($ch);
+    echo 'send mail: ' . $result;
 
     $db->exec("update mail_list set sent = ? where id = ?", [time(), $mail['id']]);
 
