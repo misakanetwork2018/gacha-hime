@@ -46,7 +46,7 @@ foreach ($mail_list as $mail) {
         'subject' => $mail['subject'],
         'plain' => $mail['content']
     ]);
-    echo 'send mail: ' . $result;
+    echo "send mail: \n" . json_encode($result) . PHP_EOL;
 
     $db->exec("update mail_list set sent = ? where id = ?", [time(), $mail['id']]);
 
