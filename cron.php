@@ -38,8 +38,8 @@ $mail_list = $db->query("select * from mail_list where sent is null");
 
 foreach ($mail_list as $mail) {
     $result = curl_post("https://api.sendcloud.net/apiv2/mail/send", [
-        'apiUser' => App::config('api_user'), # 使用api_user和api_key进行验证
-        'apiKey' => App::config('api_key'),
+        'apiUser' => App::config('mail.api_user'), # 使用api_user和api_key进行验证
+        'apiKey' => App::config('mail.api_key'),
         'from' => App::config('mail.from'), # 发信人，用正确邮件地址替代
         'fromName' => App::config('mail.fromName'),
         'to' => $mail['to'],# 收件人地址, 用正确邮件地址替代, 多个地址用';'分隔
