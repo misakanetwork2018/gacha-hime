@@ -3,6 +3,7 @@
 const RESULT_STATUSES = ['待发放', '已发放', '拒绝发放'];
 
 return [
+    'maintain' => false,
     'db' => [
         'host' => '127.0.0.1',
         'port' => 3306,

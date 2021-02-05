@@ -70,6 +70,9 @@ class App
 
     public function run()
     {
+        if (self::config('maintain'))
+            return false || print_r('维护中，请稍后再访问');
+
         $request = self::make(Request::class);
 
         $module = $request->get('m', 'index');
@@ -81,7 +84,7 @@ class App
         if (!class_exists($class)) {
             http_response_code(404);
             View::make('404')->render();
-            return;
+            return false;
         }
 
         try {
@@ -90,7 +93,7 @@ class App
             if (!method_exists($obj, $method)) {
                 http_response_code(404);
                 View::make('404')->render();
-                return;
+                return false;
             }
 
             $resp = $obj->$method();
@@ -107,5 +110,7 @@ class App
         } else {
             echo $resp;
         }
+
+        return true;
     }
 }
