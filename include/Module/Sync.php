@@ -211,4 +211,15 @@ class Sync extends \Module
 
         return $this->db->query("select * from black_list" . $sql . ' order by id desc', time());
     }
+
+    public function addGachaTimes()
+    {
+        $id = $this->request->post('id');
+        $add = $this->request->post('add', 1);
+        if (empty($id)) return ['success' => false];
+
+        $bool = $this->db->exec("update profile set gacha_times = gacha_times + ? where uid = ?", [$add, $id]);
+
+        return ['success' => $bool];
+    }
 }
