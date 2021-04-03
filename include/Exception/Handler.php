@@ -78,7 +78,7 @@ class Handler
     public function render($exception)
     {
         try {
-            if (CLI_MODE) {
+            if (defined('CLI_MODE') && CLI_MODE) {
                 echo "***System error***\n";
                 echo $exception->getMessage() . "\n\n";
                 debug_print_backtrace();
